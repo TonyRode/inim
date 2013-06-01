@@ -1,0 +1,24 @@
+This document will help you to understand how to use the project.
+
+First of all, the aim of this project is to code a program which recognizes the quarter notes in a given picture as entry of the program, drawing a colored circle around the recognized object.
+
+
+To use the project, go to the root folder of it, and simply type "make" (be sure to get the version 4.5 of your favorite compiler aka g++)
+It will create a binary file, named "detect".
+
+Then, launch it like this :
+"./detect path_src_img path_dst_img"
+
+
+And see the result in the destination image.
+
+
+
+
+@Copyright 2013
+All rights reserved.
+
+
+
+
+

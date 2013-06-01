@@ -1,0 +1,7 @@
+-Option --help pour le binaire
+	"./detect path_src_img path_dst_img"
+
+-Convert png to pbm ? or a format supported by olena/milena
+
+
+-passer à g++ v4.5
