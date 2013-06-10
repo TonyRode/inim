@@ -2,7 +2,7 @@
 #include <fstream>
 
 
-#include "../lib_olena/olena-2.0/milena/mln/geom/all.hh"
+//#include "../lib_olena/olena-2.0/milena/mln/geom/all.hh"
 
 bool DEBUG_ = false;
 
@@ -33,13 +33,15 @@ bool DEBUG_ = false;
 
 
 #include <mln/all.hh>
-#include <mln/core/image/image2d.hh>
-#include <mln/value/rgb8.hh>
-#include <mln/data/fill.hh>
-#include <mln/data/paste.hh>
-#include <mln/core/routine/duplicate.hh>
-#include <mln/literal/colors.hh>
-#include <mln/opt/at.hh>
+//#include <mln/core/image/image2d.hh>
+//#include <mln/value/rgb8.hh>
+//#include <mln/data/fill.hh>
+//#include <mln/data/paste.hh>
+//#include <mln/core/routine/duplicate.hh>
+//#include <mln/literal/colors.hh>
+//#include <mln/opt/at.hh>
+//#include <mln/io/ppm/save.hh>
+
 
 
 //#include <tests/data.hh>
