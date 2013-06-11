@@ -7,4 +7,18 @@ struct s_tab_bounds {
   int y;
 };
 
+
+/*
+  -------> x
+  -
+  -
+  -
+  -
+  -
+  y
+
+
+ */
+
+
 #endif /* !TAB_BOUNDS_HH */

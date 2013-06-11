@@ -13,6 +13,14 @@ Then, launch it like this :
 And see the result in the destination image.
 
 
+Supported image types are :
+    PBM
+    PFM
+    PGM
+    PNM
+    PPM
+
+
 
 
 @Copyright 2013
