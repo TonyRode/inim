@@ -8,13 +8,13 @@ Rgb::Rgb(int red, int green, int blue)
   green_ = green;
 }
 
-Rgb::Rgb()
+/*Rgb::Rgb()
 {
   red_ = 0;
   blue_ = 0;
   green_ = 0;
 }
-
+*/
 
 Rgb::~Rgb()
 {}
@@ -59,4 +59,3 @@ void Rgb::set_rgb(unsigned int r, unsigned int g, unsigned int b)
   green_ = g;
   blue_ = b;
 }
-

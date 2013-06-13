@@ -21,7 +21,35 @@
 
 
 
+// Typedefs
+
+
+// Forward declarations
 bool is_known (std::vector<Rgb> colors, Rgb px);
+
+
+
+
+// Overloads (for the map)
+/*bool operator<(const Tab_bounds& first, const Tab_bounds& second)
+{
+  return first.get_x() < second.get_x();
+}
+*/
+
+bool operator<(Rgb first, Rgb second)
+{
+  return first.get_red() < second.get_red();
+}
+
+
+bool operator<(int first, Tab_bounds second)
+{
+  return first < second.get_x();
+}
+
+
+
 
 template <typename N>
 void labelize(const mln::image2d<bool>& pic,
@@ -50,23 +78,34 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   image2d<bool> img;
   mln::image2d<value::rgb8> out;  // value::rgb8
+  int x,y; // the x : col, the y : line
+
+  /*
+    ------------> x
+    :
+    :
+    :
+    y
+
+  */
+
 
   std::vector<Rgb> colors; // vector of known colors
   Rgb* current_color; // value of the current pixel
 
 
-  current_color = new Rgb();
+  current_color = new Rgb(0, 0, 0);
 
   // 1 object <-> 1 color (represented by an int)
   /*
      this map does the link between colored objects and their own tab in which
      is stored the object
    */
-  std::map<Rgb*, std::vector<std::vector<int> > > c_tab;
+  std::map<Rgb, std::vector<std::vector<int> > > c_tab;
 
 
   // link between colored objects and their relative position (coordonates)
-  std::map<Rgb*, s_tab_bounds> coordonate_tab;
+  std::map<const Rgb, Tab_bounds> coordonate_tab;
 
 
 
@@ -108,40 +147,92 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 	colors.push_back(*adding_it); // color (corresponding to a new item) added to the list
 
-	const Rgb b = (*adding_it).getinstance();
+	Rgb b = *adding_it;
+
 
 	c_tab.insert(std::pair<Rgb, std::vector<std::vector<int> > >
 		     (b, new_tab));
 	// We create a tab which will contain the item to make it easier to manipulate (recognizing the shape of a quarter note)
 
 
-	s_tab_bounds adding_it_bis;
+	Tab_bounds adding_it_bis;
 
-	adding_it_bis.y = row;
+	adding_it_bis.set_y(row);
 
-	coordonate_tab.insert(new std::pair<Rgb*, s_tab_bounds>
-			      ((*adding_it.getinstance()), adding_it_bis));
+
+	// créer un rgb * const pour ajouter la pair.
+
+
+
+	coordonate_tab.insert(std::pair<Rgb, Tab_bounds>
+			      (b, adding_it_bis));
 
       }
   }
 
 
   // Here we have our y and initialised all stuffs
+  // Now we must define our x for each tab
 
+  x = 0; // col
+  y = 0; // line
 
-  for (def::coord col = geom::max_col(out); col > geom::min_col(out); --col)
+  for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col)
+  {
     for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
     {
+      // set the current_color to current pixel color
       (*current_color).set_rgb(opt::at(out, row, col).red(), opt::at(out, row, col).green(), opt::at(out, row, col).blue());
 
-      const Rgb* treating_it = new Rgb((*current_color).get_red(), (*current_color).get_green(), (*current_color).get_blue());
+
+      int a = coordonate_tab[*current_color].get_x();
+
+      // pour virer le test si on est sur du noir && que le x est le plus petit pour cette couleur
+      if (is_known(colors, *current_color) && col < a)
+      {
+
+
+	// l'actualiser
+
+
+      }
+
+
+
+      //      ++y;
+    }
+    //    ++x;
+  }
+
+
+
+
+
+
+      /*      Rgb* treating_it = new Rgb((*current_color).get_red(), (*current_color).get_green(), (*current_color).get_blue());
+
+
+     // std::map<Rgb, Tab_bounds> coordonate_tab;
+
 
 
       if (is_known(colors, *treating_it))
       {
-	(*coordonate_tab.at(*treating_it)).x = col;
+	const Rgb a = *treating_it;
+
+	coordonate_tab[a] = col;
+
+	Tab_bounds tmp = coordonate_tab.find(a);
+
+	tmp.set_x(col);
+
+	  //	(coordonate_tab[a]).set_x(col);
+
+	//	coordonate_tab.at(a).set_x(col); //c++ only !
       }
+
     }
+      */
 
   // Here x and y are well set for each tab
 

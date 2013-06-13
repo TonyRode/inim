@@ -4,7 +4,6 @@
 class Rgb {
 
 public:
-  Rgb();
   Rgb(int red, int green, int blue);
   ~Rgb();
 
@@ -20,9 +19,6 @@ public:
   void set_blue(unsigned int b);
 
 
-  Rgb getinstance() {
-    return *this;
-  }
 
 private:
   unsigned int red_, green_, blue_;
