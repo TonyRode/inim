@@ -5,3 +5,10 @@
 
 
 -passer à g++ v4.5
+
+
+
+REMARQUE :
+
+Taille du cache max ??? 1596 Mo ? saturé pour un buffer ou je ne sais quoi.
+Bloquant pour l'exec du programme inim
