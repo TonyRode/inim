@@ -233,7 +233,8 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
       {
 	int a = coordonate_tab[*current_color].get_x();
 
-	//	if (current_color.get
+	if ((*current_color).get_red() == 220 && (*current_color).get_green() == 220 && (*current_color).get_blue() == 109)
+	  std::cout << "Colonne actuelle (sur l'objet) : " << col << "             current a : " << a << std::endl;
 
 	if (col < a)
 	  coordonate_tab[*current_color].set_x(col);  // set le x du tableau correspondant au minimum
