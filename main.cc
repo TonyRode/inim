@@ -53,14 +53,22 @@ bool is_black(Rgb px);
 
 void print_first_colored_obj(std::vector<Rgb> colors, std::map<Rgb, std::vector<std::vector<int> > > c_tab)
 {
-  for (int i = 0; i < c_tab[colors[0]].size(); ++i)
+  int i, j;
+
+  for (i = 0; i < c_tab[colors[0]].size(); ++i)
   {
-    for (int j = 0; j < c_tab[colors[0]][0].size(); ++j)
-      if (c_tab[colors[0]][0][j] == 1)
+    for (j = 0; j < c_tab[colors[0]][i].size(); ++j)
+      if (c_tab[colors[0]][i][j] == 1)
 	std::cout << "*";
     std::cout << std::endl;
   }
+
+
+  std::cout << "i:" << i << std::endl << "j:" << j << std::endl;
+
 }
+
+// à vérifier
 
 
 template <typename N>
@@ -197,32 +205,77 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   }
 
-  std::cout << "3 (nb_colors = " << nb_colors << ")" << std::endl;
+  std::cout << std::endl << "3 (nb_colors = " << nb_colors << ")" << std::endl;
 
   // Here we have our y and initialised all stuffs
   // Now we must define our x for each tab
 
+
+  // So first we initialize it with the max values for the x (ie the width of our image)
+  // (the y is directly set with the right value so we don't need to initialize y)
+
+  for (std::vector<Rgb>::iterator a = colors.begin(); a != colors.end(); ++a)
+    coordonate_tab[*a].set_x(geom::max_col(out));
+
   x = 0; // col
   y = 0; // line
 
-  for (def::coord col = geom::max_col(out); col < geom::min_col(out); --col)
+  for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
   {
-    for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
+    for (def::coord col = geom::max_col(out); col > geom::min_col(out); --col)
     {
       // set the current_color to current pixel color
       (*current_color).set_rgb(opt::at(out, row, col).red(), opt::at(out, row, col).green(), opt::at(out, row, col).blue());
 
 
-      int a = coordonate_tab[*current_color].get_x();
-
       // pour virer le test si on est sur du noir && que le x est le plus petit pour cette couleur
-      if (is_known(colors, *current_color) && col > a)
-	coordonate_tab[*current_color].set_x(col);
+      if (!is_black(*current_color))// && is_known(colors, *current_color))
+      {
+	int a = coordonate_tab[*current_color].get_x();
+
+	//	if (current_color.get
+
+	if (col < a)
+	  coordonate_tab[*current_color].set_x(col);  // set le x du tableau correspondant au minimum
+      }
+
     }
   }
 
 
-  std::cout << "4 (got x now)" << std::endl;
+  std::cout << "4 (got x now), width of the image : " << geom::max_col(out) << std::endl;
+
+
+  std::cout << "Red proportion of the first obj (220 expected) " << colors[0].get_red() << std::endl;
+  std::cout << "x of the first colored obj (should be 1161) " << coordonate_tab[colors[0]].get_x() << std::endl;
+  std::cout << "y of the first colored obj (should be 205) " << coordonate_tab[colors[0]].get_y() << std::endl;
+
+
+  // à moins que les rgb dans le vector colors soient triés (par valeur du red ?)
+
+
+  /*
+    --------> x
+    -
+    -
+    -
+    -
+    -
+    y
+
+
+
+    ------------- first obj here (real supposed x in the img : 1161 , y: 205  -------------------
+    ----------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------
+
+  */
 
 
 
@@ -257,9 +310,15 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   // ok here we go
 
 
-  // Initialization of each tab -> maybe
+  // Initialization of each tab (full of 0)
+  for (std::vector<Rgb>::iterator a = colors.begin(); a != colors.end(); ++a)
+    for (int i = 0; i < c_tab[*a].size(); i++)
+      for (int j = 0; j < c_tab[*a][i].size(); ++j)
+	(c_tab[*a])[i][j] = 0;
 
 
+
+  // now we must put as many 1 as needed in each tab corresponding to right color at the right place
   for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
     for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col)
     {
@@ -268,13 +327,26 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
       // pour virer le test si on est sur du noir && que le x est le plus petit pour cette couleur
-      if (is_known(colors, *current_color) && !is_black(*current_color))
+      if (!is_black(*current_color) && is_known(colors, *current_color))
       {
 
 	//	std::map<Rgb, std::vector<std::vector<int> > > c_tab;
 
 	int a = coordonate_tab[*current_color].get_x();
 	int b = coordonate_tab[*current_color].get_y();
+
+
+	/*
+	std::cout << "x du tab : " << a << std::endl;
+	std::cout << "y du tab : " << b << std::endl;
+	*/
+
+	/*
+	std::cout << "c_tab[*current_color].size() : " << c_tab[*current_color].size() << std::endl;
+	std::cout << "col : " << col << std::endl << "a : " << a << std::endl;
+
+	*/
+
 
 	if (col - a > c_tab[*current_color].size())
 	  c_tab[*current_color].resize(c_tab[*current_color].size() + col - a);
@@ -284,8 +356,20 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	    c_tab[*current_color][i].resize(c_tab[*current_color][i].size() + row - b);
 
 
-	(c_tab[*current_color])[col - a][row - b] = 1;
-	coordonate_tab[*current_color].set_x(col);
+	/*
+	std::cout << "Corresponding tab size (x) : " << c_tab[*current_color].size() << std::endl;
+	std::cout << "col - a = " << col - a << std::endl;
+
+	std::cout << "row - b = " << row - b << std::endl;
+	std::cout << "Corresponding tab size (y) : " << c_tab[*current_color][0].size() << std::endl;
+
+	*/
+
+
+
+	// NEED to set each stuff into the object to 1
+
+	//x	(c_tab[*current_color])[col - a][row - b] = 1;
       }
 
       // FIXME SEGFAULT bizarre
@@ -293,16 +377,17 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
     }
 
 
-  std::cout << "5 Segfault ?" << std::endl;
+
 
 
 
   io::ppm::save(out, argv[2]);
 
-
-  print_first_colored_obj(colors, c_tab);
-
   std::cout << "Segfault !" << std::endl;
+
+  //  print_first_colored_obj(colors, c_tab);
+
+
 
 }
 
