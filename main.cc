@@ -233,7 +233,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
       {
 	int a = coordonate_tab[*current_color].get_x();
 
-	if ((*current_color).get_red() == 220 && (*current_color).get_green() == 220 && (*current_color).get_blue() == 109)
+	if ((*current_color).get_red() == 220 && (*current_color).get_green() == 220 && (*current_color).get_blue() == 109) // si on est sur le 1er objet recontré
 	  std::cout << "Colonne actuelle (sur l'objet) : " << col << "             current a : " << a << std::endl;
 
 	if (col < a)
