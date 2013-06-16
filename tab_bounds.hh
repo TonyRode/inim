@@ -5,13 +5,19 @@
 
 class Tab_bounds {
 public:
+  Tab_bounds();
+  ~Tab_bounds();
+
   int get_x();
   int get_y();
+  bool first_exchange();
   void set_x(int x);
   void set_y(int y);
+  void turn_off_ex();
 
 private:
   int x_, y_;
+  bool first_exchange_;
 };
 
 

@@ -193,7 +193,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
 
-	Tab_bounds adding_it_bis;
+	Tab_bounds adding_it_bis = *(new Tab_bounds()); // on doit surement faire un new ! sinon la mémoire n'est pas allouée et ça fait de la merde
 
 	adding_it_bis.set_y(row);
 
@@ -214,15 +214,16 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   // So first we initialize it with the max values for the x (ie the width of our image)
   // (the y is directly set with the right value so we don't need to initialize y)
 
-  for (std::vector<Rgb>::iterator a = colors.begin(); a != colors.end(); ++a)
-    coordonate_tab[*a].set_x(geom::max_col(out));
+  for (std::vector<Rgb>::iterator it_rgb = colors.begin(); it_rgb != colors.end(); ++it_rgb)
+    coordonate_tab[*it_rgb].set_x(geom::max_col(out));
 
   x = 0; // col
   y = 0; // line
+  int current_x = 0;
 
   for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
   {
-    for (def::coord col = geom::max_col(out); col > geom::min_col(out); --col)
+    for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col)  // changement de sens
     {
       // set the current_color to current pixel color
       (*current_color).set_rgb(opt::at(out, row, col).red(), opt::at(out, row, col).green(), opt::at(out, row, col).blue());
@@ -231,13 +232,32 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
       // pour virer le test si on est sur du noir && que le x est le plus petit pour cette couleur
       if (!is_black(*current_color))// && is_known(colors, *current_color))
       {
-	int a = coordonate_tab[*current_color].get_x();
+	current_x = coordonate_tab[*current_color].get_x();
+
+	/*
+	  ptet qu'il y a une couleur qui se rapproche très fortement du noir,
+	  sans l'être, donc on a l'impression que c'est du noir mais si ça se
+	  trouve c'est un pixel à (0, 0, 1)  (r, g, b) par exemple.
+	*/
+
+
+	if (coordonate_tab[*current_color].first_exchange())
+	{
+	  coordonate_tab[*current_color].set_x(col);
+	  coordonate_tab[*current_color].turn_off_ex();
+	}
+	else
+	  if (col < current_x && col + 20 > current_x) // 20 de différence max avec la ligne du dessus de l'objet
+	    coordonate_tab[*current_color].set_x(col);  // set le x du tableau correspondant au minimum
+
 
 	if ((*current_color).get_red() == 220 && (*current_color).get_green() == 220 && (*current_color).get_blue() == 109) // si on est sur le 1er objet recontré
-	  std::cout << "Colonne actuelle (sur l'objet) : " << col << "             current a : " << a << std::endl;
+	{
+	  std::cout << "Colonne actuelle (sur le 1er objet) : " << col << "             current get_x() : " << coordonate_tab[*current_color].get_x() << std::endl;
+	  std::cout << "Ligne actuelle (sur le 1er objet) : " << row << std::endl;
+	}
 
-	if (col < a)
-	  coordonate_tab[*current_color].set_x(col);  // set le x du tableau correspondant au minimum
+
       }
 
     }
@@ -328,7 +348,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
       // pour virer le test si on est sur du noir && que le x est le plus petit pour cette couleur
-      if (!is_black(*current_color) && is_known(colors, *current_color))
+      if (!is_black(*current_color)) // && is_known(colors, *current_color))
       {
 
 	//	std::map<Rgb, std::vector<std::vector<int> > > c_tab;
