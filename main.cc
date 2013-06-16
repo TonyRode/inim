@@ -36,7 +36,22 @@
 
 bool operator<(Rgb first, Rgb second)
 {
-  return first.get_red() < second.get_red();
+  /*
+  if (first.get_red() == second.get_red())
+  {
+    if (first.get_green() == second.get_green())
+    {
+      if (first.get_blue() == second.get_blue())
+	return true;
+      else
+	return first.get_blue() < second.get_blue();
+    }
+    else
+      return first.get_green() < second.get_green();
+
+  }
+  else*/
+    return first.get_red() < second.get_red();
 }
 
 
@@ -44,6 +59,15 @@ bool operator<(int first, Tab_bounds second)
 {
   return first < second.get_x();
 }
+
+
+bool operator==(Rgb first, Rgb second)
+{
+  return (first.get_red() == second.get_red() && first.get_green() == second.get_green() && first.get_blue() == second.get_blue());
+}
+
+
+
 
 
 // Forward declarations
@@ -118,6 +142,14 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   //                      r  g  b
 
 
+  // test part
+
+  Rgb first_item_color = *(new Rgb(220, 220, 109));
+
+  // end test part
+
+
+
 
   // 1 object <-> 1 color (represented by an int)
   /*
@@ -127,9 +159,15 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   std::map<Rgb, std::vector<std::vector<int> > > c_tab;
 
 
-  // link between colored objects and their relative position (coordonates)
-  std::map<const Rgb, Tab_bounds> coordonate_tab;
 
+
+  // link between colored objects and their relative position (coordonates)
+  std::map<Rgb, Tab_bounds> coordonate_tab;
+
+
+
+  // 1 color <-> 1 int (in order of discovering)
+  std::map<int, Rgb> int_rgb;
 
 
   // if ppm -> io::ppm::load, pbm -> io::pbm::load... etc
@@ -139,7 +177,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   labelize(img, c8(), argv[2]); // saves also the img
 
 
-  std::cout << "1" << std::endl;
+  std::cout << "Phase 1 terminated, the input image has been labelized in the output." << std::endl;
 
   // End of phase 1 (the detection of all objects)
 
@@ -147,7 +185,6 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   io::ppm::load(out, argv[2]);
 
-  std::cout << "2" << std::endl;
 
 
   // Détecter les x et y de chaque tab, initialiser les maps
@@ -167,7 +204,6 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
       if (!is_known(colors, *current_color) && !is_black(*current_color))
       {
-
 	nb_colors++;
 	std::cout << (*current_color).get_red() << "; ";
 
@@ -196,6 +232,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	Tab_bounds adding_it_bis = *(new Tab_bounds()); // on doit surement faire un new ! sinon la mémoire n'est pas allouée et ça fait de la merde
 
 	adding_it_bis.set_y(row);
+	//	adding_it_bis.set_x(1234567);
 
 
 	coordonate_tab.insert(std::pair<Rgb, Tab_bounds>
@@ -205,7 +242,10 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   }
 
+
   std::cout << std::endl << "3 (nb_colors = " << nb_colors << ")" << std::endl;
+
+  std::cout << "y of the color 0 : " << coordonate_tab[colors[0]].get_y() << std::endl;
 
   // Here we have our y and initialised all stuffs
   // Now we must define our x for each tab
@@ -220,6 +260,36 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   x = 0; // col
   y = 0; // line
   int current_x = 0;
+
+
+
+  // BEGIN Solution numéro 3
+  /*
+    On va tester de faire ça autrement, parcourir notre img colonne par colonne en partant de la gauche, premiere fois qu'on rencontre un pixel d'une couleur, on set le x et on passe le booléen "first_time" à faux pour ne pas le rechanger.
+  */
+
+  /*
+  for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col)  // changement de sens
+    for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
+    {
+      (*current_color).set_rgb(opt::at(out, row, col).red(), opt::at(out, row, col).green(), opt::at(out, row, col).blue());
+
+      if (!is_black(*current_color) && coordonate_tab[*current_color].first_exchange())
+      {
+	coordonate_tab[*current_color].set_x(col);
+	coordonate_tab[*current_color].turn_off_ex();
+      }
+    }
+  */
+
+  // END Solution numéro 3
+
+
+
+
+
+  // BEGIN Solution numéro 2
+
 
   for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
   {
@@ -237,7 +307,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	/*
 	  ptet qu'il y a une couleur qui se rapproche très fortement du noir,
 	  sans l'être, donc on a l'impression que c'est du noir mais si ça se
-	  trouve c'est un pixel à (0, 0, 1)  (r, g, b) par exemple.
+	  trouve c'est un pixel à (0, 0, 1)  (r, g, b) par exemple.   --> NON, après avoir regardé un des pixels qui font bugger, il est à (0,0,0)
 	*/
 
 
@@ -247,8 +317,10 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	  coordonate_tab[*current_color].turn_off_ex();
 	}
 	else
-	  if (col < current_x && col + 20 > current_x) // 20 de différence max avec la ligne du dessus de l'objet
+	{
+	  if (col < current_x && col + 30 > current_x) // 30 de différence max avec l'ancien x de l'objet
 	    coordonate_tab[*current_color].set_x(col);  // set le x du tableau correspondant au minimum
+	}
 
 
 	if ((*current_color).get_red() == 220 && (*current_color).get_green() == 220 && (*current_color).get_blue() == 109) // si on est sur le 1er objet recontré
@@ -258,10 +330,17 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	}
 
 
+	/*
+	if (coordonate_tab[first_item_color].get_x() <= 1160)
+	std::cout << "x of the first item colored Bugged row " << row << ", col " << col << std::endl;
+	*/
       }
 
     }
   }
+
+
+  // END Solution numéro 2
 
 
   std::cout << "4 (got x now), width of the image : " << geom::max_col(out) << std::endl;
@@ -339,6 +418,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
 
+
   // now we must put as many 1 as needed in each tab corresponding to right color at the right place
   for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
     for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col)
@@ -369,8 +449,14 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	*/
 
 
+
+	//   std::map<Rgb, std::vector<std::vector<int> > > c_tab;
+
+
 	if (col - a > c_tab[*current_color].size())
-	  c_tab[*current_color].resize(c_tab[*current_color].size() + col - a);
+	  c_tab[*current_color].resize(c_tab[*current_color].size() + col - a); // init à 0 ?
+
+
 
 	if (row - b > c_tab[*current_color][0].size())
 	  for (int i = 0; i < c_tab[*current_color].size(); ++i)
@@ -405,6 +491,9 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   io::ppm::save(out, argv[2]);
 
   std::cout << "Segfault !" << std::endl;
+
+
+  // on peut sauvegarder les couleurs correspondantes aux notes reconnues, comme ça au moment de repasser sur l'output pour coloriser les notes blanc ou en rouge, dès qu'on tombe sur un pixel de couleur connue dans le vecteur de couleurs OK, on le passe en rouge, sinon blanc
 
   //  print_first_colored_obj(colors, c_tab);
 
