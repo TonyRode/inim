@@ -80,6 +80,7 @@ bool operator==(Rgb first, Rgb second)
 // Forward declarations
 bool is_known (std::vector<Rgb> colors, Rgb px);
 bool is_black(Rgb px);
+bool is_like_quarter_note(std::vector<std::vector<int> > obj);
 
 
 void print_first_colored_obj(std::vector<Rgb> colors, std::map<Rgb, std::vector<std::vector<int> > > c_tab)
@@ -144,6 +145,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
   std::vector<Rgb> colors; // vector of known colors
+  std::vector<Rgb> colors_of_notes; // vector of recognized notes colors
   Rgb* current_color; // pointer to value of the current pixel
 
 
@@ -479,12 +481,11 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	//	if (*current_color == first_item_color)
 	try
 	{
-	  //(c_tab.find(*current_color)->second)[col - a][row - b] = 1;
+	  (c_tab.find(*current_color)->second)[col - a][row - b] = 1;
 	}
 	catch (...)
 	{
 	  std::cout << "Trying to access a la case ([" << col - a << "][" << row - b << "] du tableau d'une couleur" << std::endl;
-
 	}
       }
 
@@ -492,6 +493,21 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
     }
 
+
+
+  /*
+  // Call of the function of recognizing objects likely a quarter note, on every tab
+  for each tab
+  if (is_like_quarter_note())
+   {
+    }
+    // l'ajouter dans colors_of_notes
+
+
+    */
+
+  // now we need to replace every color either by red or white.
+    // réutiliser is_known(std::vector<Rgb> colors_of_notes, px courant);
 
 
 
@@ -502,7 +518,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   // on peut sauvegarder les couleurs correspondantes aux notes reconnues, comme ça au moment de repasser sur l'output pour coloriser les notes blanc ou en rouge, dès qu'on tombe sur un pixel de couleur connue dans le vecteur de couleurs OK, on le passe en rouge, sinon blanc
 
-  print_first_colored_obj(colors, c_tab);
+  //  print_first_colored_obj(colors, c_tab);
 
 
 
@@ -531,4 +547,11 @@ bool is_black(Rgb px)
   if (px.get_red() == 0 && px.get_green() == 0 && px.get_blue() == 0)
     return true;
   return false;
+}
+
+
+bool is_like_quarter_note(std::vector<std::vector<int> > obj)
+{
+
+  return true;
 }
