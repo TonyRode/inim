@@ -433,14 +433,14 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
 
-                                Rgb bugged_color = *(new Rgb(129, 216, 143));
+  Rgb bugged_color = *(new Rgb(129, 216, 143));
 
 
 
 
   // now we must put as many 1 as needed in each tab corresponding to right color at the right place and resize if necessary
-  for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
-    for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col)
+  for (def::coord row = geom::min_row(out); row < 470 && row < geom::max_row(out); ++row)
+    for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col) // $$$$  BE CAREFUL !! ENLEVER LE row < 470 (c'était pour éviter le segfault)
     {
       // set the current_color to current pixel color
       (*current_color).set_rgb(opt::at(out, row, col).red(), opt::at(out, row, col).green(), opt::at(out, row, col).blue());
@@ -475,22 +475,23 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
 
-
-
 	if (*current_color == bugged_color)
 	  {
+	    std::cout << "Col : " << col << "   Line : " << row << std::endl;
 	    std::cout << "Trying to access a la case ([" << col - a << "][" << row - b << "] du tableau d'une couleur" << std::endl;
 	  }
 	(c_tab.find(*current_color)->second)[col - a][row - b] = 1;
       }
       // couleur du PIXEL qui segfault : 129, 216, 143 à l'endroit 571, 453
+      // Re seg fault, même couleur, pixel 72 (relativement)
 
       // FIXME SEGFAULT bizarre
 
     }
 
 
-  std::cout << "Ouiiiiiiiiiiiiiiiiiiiiiii" << std::endl;
+  if (radius == 5)
+    std::cout << "Ouiiiiiiiiiiiiiiiiiiiiiii   radius = 5 !" << std::endl;
 
 
   // $$$
@@ -499,9 +500,17 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   map_rgb_tab::iterator tab_it;
 
+  int nb_color2 = 0;
+
   for (tab_it = c_tab.begin(); tab_it != c_tab.end(); ++tab_it)
     if (is_like_quarter_note(tab_it->second, radius))
+    {
       colors_of_notes.push_back(tab_it->first);
+      ++nb_color2;
+    }
+
+  std::cout << "nb colors2 : " << nb_color2 << std::endl;
+
 
     // l'ajouter dans colors_of_notes
 
@@ -565,15 +574,100 @@ bool is_black(Rgb px)
 
 bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radius)
 {
-  unsigned int x, y;
+  unsigned int x, y, max_y, r_x, r_y;
+  bool still_possible1 = true;
+
+  max_y = 0;
+  r_x = 0;
+  r_y = 0;
+
+
+
+  // pour des raisons d'opti, on va check que les pixels à la périphérie du "cercle" plutôt ovale
 
   for (y = 0; y < obj[0].size(); ++y)
     for (x = 0; x < obj.size(); ++x)
     {
-      //      if (
+      // Criteres : une sorte de bouboule
 
+
+      // on vérifie qu'on est dans le cadre
+      if (x > radius && (x + radius) < obj.size()
+	  && y > radius && y + radius < obj[0].size())
+      {
+	// begins with top, 1ere moitié droite, sens inverse trigo
+	for (r_x = x, r_y = y - radius; r_x <= x + radius / 2; ++r_x)
+	  if (obj[r_x][r_y] != 1)
+	    still_possible1 = false;
+
+	for (; still_possible1 && r_x <= x + radius; ++r_x, ++r_y)
+	  if (obj[r_x][r_y] != 1)
+	    still_possible1 = false;
+
+	for (; still_possible1 && r_y <= y + radius / 2; ++r_y)
+	  if (obj[r_x][r_y] != 1)
+	    still_possible1 = false;
+
+	for (; still_possible1 && r_y <= y + radius; --r_x, ++r_y)
+	  if (obj[r_x][r_y] != 1)
+	    still_possible1 = false;
+
+
+	// 1ere moitié de bouboule finie d'examiner, go continuer avec la 2eme
+	for (; still_possible1 && r_x >= x - radius / 2; --r_x)
+	  if (obj[r_x][r_y] != 1)
+	    still_possible1 = false;
+
+
+	for (; still_possible1 && r_x >= x - radius; --r_x, --r_y)
+	  if (obj[r_x][r_y] != 1)
+	    still_possible1 = false;
+
+
+	for (; still_possible1 && r_y >= y - radius / 2; --r_y)
+	  if (obj[r_x][r_y] != 1)
+	    still_possible1 = false;
+
+
+	for (; still_possible1 && r_x <= x - radius / 2; ++r_x, --r_y)
+	  if (obj[r_x][r_y] != 1)
+	    still_possible1 = false;
+
+
+	for (; still_possible1 && r_x <= x; ++r_x)
+	  if (obj[r_x][r_y] != 1)
+	    still_possible1 = false;
+
+
+	if (still_possible1)
+	  return true;
+
+      }
+
+
+
+      if (obj[x][y] == 1 && y > max_y)
+	max_y = y;
+
+      // ET un objet en forme de batonnet a peu pres vertical
+      /*      if (max_y >= 4 * radius)
+	still_possible = true;
+      */
+
+      // à améliorer !
+      if (still_possible1)
+	{
+	  //...
+
+	}
+
+
+      still_possible1 = true;
 
     }
+
+
+
 
 
   return false;
