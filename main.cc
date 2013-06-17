@@ -2,6 +2,9 @@
 #include "rgb.hh"
 #include <vector>
 #include <map>
+#include <iostream>
+#include <sstream>
+
 
 #include <mln/core/image/image2d.hh>
 #include <mln/labeling/blobs.hh>
@@ -80,27 +83,9 @@ bool operator==(Rgb first, Rgb second)
 // Forward declarations
 bool is_known (std::vector<Rgb> colors, Rgb px);
 bool is_black(Rgb px);
-bool is_like_quarter_note(std::vector<std::vector<int> > obj);
+bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radius);
+void print_first_colored_obj(std::vector<Rgb> colors, std::map<Rgb, std::vector<std::vector<int> > > c_tab);
 
-
-void print_first_colored_obj(std::vector<Rgb> colors, std::map<Rgb, std::vector<std::vector<int> > > c_tab)
-{
-  int i, j;
-
-  for (i = 0; i < 90; ++i) //(c_tab.find(colors[0])->second).size(); ++i)
-  {
-    for (j = 0; j < 150; ++j)//(c_tab.find(colors[0])->second)[i].size(); ++j)
-      if ((c_tab.find(colors[0])->second)[j][i] == 1)
-	std::cout << "*";
-      else
-	std::cout << " ";
-    std::cout << std::endl;
-  }
-
-
-  std::cout << "i:" << i << std::endl << "j:" << j << std::endl;
-
-}
 
 // à vérifier
 
@@ -132,7 +117,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   image2d<bool> img;
   mln::image2d<value::rgb8> out;  // value::rgb8
-  int x,y; // the x : col, the y : line
+  int x, y; // the x : col, the y : line
 
   /*
     ------------> x
@@ -147,19 +132,15 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   std::vector<Rgb> colors; // vector of known colors
   std::vector<Rgb> colors_of_notes; // vector of recognized notes colors
   Rgb* current_color; // pointer to value of the current pixel
-
-
   current_color = new Rgb(0, 0, 0);
   //                      r  g  b
 
 
   // test part
-
   Rgb first_item_color = *(new Rgb(220, 220, 109));
-
   // end test part
 
-
+  unsigned int radius = 5;   // accuracy of the detection, 5px by default for notes
 
 
   // 1 object <-> 1 color (represented by an int)
@@ -169,16 +150,22 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
    */
   std::map<Rgb, std::vector<std::vector<int> > > c_tab;
 
-
-
-
   // link between colored objects and their relative position (coordonates)
   std::map<Rgb, Tab_bounds> coordonate_tab;
 
-
-
   // 1 color <-> 1 int (in order of discovering, begins at 1)
   std::map<int, Rgb> int_rgb;
+
+
+
+  std::stringstream tmp;
+
+  if (argc == 4)
+  {
+    tmp << argv[3];
+    tmp >> radius;
+  }
+
 
 
   // if ppm -> io::ppm::load, pbm -> io::pbm::load... etc
@@ -341,7 +328,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	}
 	else
 	{
-	  if (col < current_x && col + 30 > current_x) // 30 de différence max avec l'ancien x de l'objet
+	  if (col < current_x) //&& col + 30 > current_x) // 30 de différence max avec l'ancien x de l'objet
 	    (coordonate_tab.find(*current_color)->second).set_x(col);  // set le x du tableau correspondant au minimum
 	}
 
@@ -443,6 +430,14 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
 
+
+
+
+                                Rgb bugged_color = *(new Rgb(129, 216, 143));
+
+
+
+
   // now we must put as many 1 as needed in each tab corresponding to right color at the right place and resize if necessary
   for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
     for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col)
@@ -478,37 +473,57 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	}
 
 
-	//	if (*current_color == first_item_color)
-	try
-	{
-	  (c_tab.find(*current_color)->second)[col - a][row - b] = 1;
-	}
-	catch (...)
-	{
-	  std::cout << "Trying to access a la case ([" << col - a << "][" << row - b << "] du tableau d'une couleur" << std::endl;
-	}
+
+
+
+
+	if (*current_color == bugged_color)
+	  {
+	    std::cout << "Trying to access a la case ([" << col - a << "][" << row - b << "] du tableau d'une couleur" << std::endl;
+	  }
+	(c_tab.find(*current_color)->second)[col - a][row - b] = 1;
       }
+      // couleur du PIXEL qui segfault : 129, 216, 143 à l'endroit 571, 453
 
       // FIXME SEGFAULT bizarre
 
     }
 
 
+  std::cout << "Ouiiiiiiiiiiiiiiiiiiiiiii" << std::endl;
 
-  /*
+
+  // $$$
+
   // Call of the function of recognizing objects likely a quarter note, on every tab
-  for each tab
-  if (is_like_quarter_note())
-   {
-    }
+
+  map_rgb_tab::iterator tab_it;
+
+  for (tab_it = c_tab.begin(); tab_it != c_tab.end(); ++tab_it)
+    if (is_like_quarter_note(tab_it->second, radius))
+      colors_of_notes.push_back(tab_it->first);
+
     // l'ajouter dans colors_of_notes
 
 
-    */
+    // typedef std::map<Rgb, std::vector<std::vector<int> > > map_rgb_tab;
 
-  // now we need to replace every color either by red or white.
-    // réutiliser is_known(std::vector<Rgb> colors_of_notes, px courant);
 
+
+  // now we go through each pixel of the image to set it either back to white, either red
+  for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
+    for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col)
+    {
+      (*current_color).set_rgb(opt::at(out, row, col).red(), opt::at(out, row, col).green(), opt::at(out, row, col).blue());
+
+      if (!is_black(*current_color))
+      {
+	if (is_known(colors_of_notes, *current_color))
+	  opt::at(out, row, col) = literal::red;
+	else
+	  opt::at(out, row, col) = literal::white;
+      }
+    }
 
 
 
@@ -519,8 +534,6 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   // on peut sauvegarder les couleurs correspondantes aux notes reconnues, comme ça au moment de repasser sur l'output pour coloriser les notes blanc ou en rouge, dès qu'on tombe sur un pixel de couleur connue dans le vecteur de couleurs OK, on le passe en rouge, sinon blanc
 
   //  print_first_colored_obj(colors, c_tab);
-
-
 
 }
 
@@ -550,8 +563,38 @@ bool is_black(Rgb px)
 }
 
 
-bool is_like_quarter_note(std::vector<std::vector<int> > obj)
+bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radius)
 {
+  unsigned int x, y;
 
-  return true;
+  for (y = 0; y < obj[0].size(); ++y)
+    for (x = 0; x < obj.size(); ++x)
+    {
+      //      if (
+
+
+    }
+
+
+  return false;
+}
+
+
+void print_first_colored_obj(std::vector<Rgb> colors, std::map<Rgb, std::vector<std::vector<int> > > c_tab)
+{
+  int i, j;
+
+  for (i = 0; i < 90; ++i) //(c_tab.find(colors[0])->second).size(); ++i)
+  {
+    for (j = 0; j < 150; ++j)//(c_tab.find(colors[0])->second)[i].size(); ++j)
+      if ((c_tab.find(colors[0])->second)[j][i] == 1)
+	std::cout << "*";
+      else
+	std::cout << " ";
+    std::cout << std::endl;
+  }
+
+
+  std::cout << "i:" << i << std::endl << "j:" << j << std::endl;
+
 }
