@@ -431,9 +431,9 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   // Initialization of each tab (full of 0)
   for (std::vector<Rgb>::iterator a = colors.begin(); a != colors.end(); ++a)
-    for (int i = 0; i < c_tab[*a].size(); i++)
-      for (int j = 0; j < c_tab[*a][i].size(); ++j)
-	(c_tab[*a])[i][j] = 0;
+    for (int i = 0; i < (c_tab.find(*a)->second).size(); i++)
+      for (int j = 0; j < (c_tab.find(*a)->second)[i].size(); ++j)
+	(c_tab.find(*a)->second)[i][j] = 0;
 
 
 
@@ -472,14 +472,14 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	//   std::map<Rgb, std::vector<std::vector<int> > > c_tab;
 
 
-	if (col - a > c_tab[*current_color].size())
-	  c_tab[*current_color].resize(c_tab[*current_color].size() + col - a); // init à 0 ?
+	if (col - a > (c_tab.find(*current_color)->second).size())
+	  (c_tab.find(*current_color)->second).resize((c_tab.find(*current_color)->second).size() + col - a); // init à 0 ?
 
 
 
-	if (row - b > c_tab[*current_color][0].size())
-	  for (int i = 0; i < c_tab[*current_color].size(); ++i)
-	    c_tab[*current_color][i].resize(c_tab[*current_color][i].size() + row - b);
+	if (row - b > (c_tab.find(*current_color)->second)[0].size())
+	  for (int i = 0; i < (c_tab.find(*current_color)->second).size(); ++i)
+	    (c_tab.find(*current_color)->second)[i].resize((c_tab.find(*current_color)->second)[i].size() + row - b);
 
 
 	/*
