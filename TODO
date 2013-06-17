@@ -7,6 +7,9 @@
 -passer à g++ v4.5
 
 
+-S'occuper de la map <int, Rgb> et passer les autres map en <int, truc>
+
+
 
 REMARQUE :
 

@@ -22,8 +22,8 @@
 
 
 // Typedefs
-
-
+typedef std::map<Rgb, std::vector<std::vector<int> > > map_rgb_tab;
+typedef std::map<Rgb, Tab_bounds> map_rgb_coo;
 
 
 
@@ -50,8 +50,15 @@ bool operator<(Rgb first, Rgb second)
       return first.get_green() < second.get_green();
 
   }
-  else*/
+  else
     return first.get_red() < second.get_red();
+  */
+
+
+  return first.get_red() < second.get_red()
+    || first.get_red() <= second.get_red() && first.get_green() < second.get_green()
+    || first.get_red() <= second.get_red() && first.get_green() <= second.get_green()
+                                           && first.get_blue() < second.get_blue();
 }
 
 
@@ -166,7 +173,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
 
-  // 1 color <-> 1 int (in order of discovering)
+  // 1 color <-> 1 int (in order of discovering, begins at 1)
   std::map<int, Rgb> int_rgb;
 
 
@@ -205,10 +212,16 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
       if (!is_known(colors, *current_color) && !is_black(*current_color))
       {
 	nb_colors++;
+
+
 	std::cout << (*current_color).get_red() << "; ";
 
 	Rgb* adding_rgb = new Rgb((*current_color).get_red(), (*current_color).get_green(), (*current_color).get_blue());
 	std::vector<std::vector<int> > new_tab;
+
+
+	// adding the correspondance between the number of the object and its color
+	//	int_rgb.insert(std::pair<int, Rgb> (nb_colors, *adding_rgb));
 
 
 	new_tab.resize(80);
@@ -245,7 +258,11 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   std::cout << std::endl << "3 (nb_colors = " << nb_colors << ")" << std::endl;
 
-  std::cout << "y of the color 0 : " << coordonate_tab[colors[0]].get_y() << std::endl;
+  map_rgb_coo::iterator it;
+
+  it = coordonate_tab.find(colors[0]);
+
+  std::cout << "y of the color 0 : " << (it->second).get_y() << std::endl;
 
   // Here we have our y and initialised all stuffs
   // Now we must define our x for each tab
@@ -255,7 +272,9 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   // (the y is directly set with the right value so we don't need to initialize y)
 
   for (std::vector<Rgb>::iterator it_rgb = colors.begin(); it_rgb != colors.end(); ++it_rgb)
-    coordonate_tab[*it_rgb].set_x(geom::max_col(out));
+    coordonate_tab.find(*it_rgb)->second.set_x(geom::max_col(out));
+
+
 
   x = 0; // col
   y = 0; // line
@@ -302,7 +321,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
       // pour virer le test si on est sur du noir && que le x est le plus petit pour cette couleur
       if (!is_black(*current_color))// && is_known(colors, *current_color))
       {
-	current_x = coordonate_tab[*current_color].get_x();
+	current_x = (coordonate_tab.find(*current_color)->second).get_x();
 
 	/*
 	  ptet qu'il y a une couleur qui se rapproche très fortement du noir,
@@ -311,21 +330,21 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	*/
 
 
-	if (coordonate_tab[*current_color].first_exchange())
+	if ((coordonate_tab.find(*current_color)->second).first_exchange())
 	{
-	  coordonate_tab[*current_color].set_x(col);
-	  coordonate_tab[*current_color].turn_off_ex();
+	  (coordonate_tab.find(*current_color)->second).set_x(col);
+	  (coordonate_tab.find(*current_color)->second).turn_off_ex();
 	}
 	else
 	{
 	  if (col < current_x && col + 30 > current_x) // 30 de différence max avec l'ancien x de l'objet
-	    coordonate_tab[*current_color].set_x(col);  // set le x du tableau correspondant au minimum
+	    (coordonate_tab.find(*current_color)->second).set_x(col);  // set le x du tableau correspondant au minimum
 	}
 
 
 	if ((*current_color).get_red() == 220 && (*current_color).get_green() == 220 && (*current_color).get_blue() == 109) // si on est sur le 1er objet recontré
 	{
-	  std::cout << "Colonne actuelle (sur le 1er objet) : " << col << "             current get_x() : " << coordonate_tab[*current_color].get_x() << std::endl;
+	  std::cout << "Colonne actuelle (sur le 1er objet) : " << col << "             current get_x() : " << (coordonate_tab.find(*current_color)->second).get_x() << std::endl;
 	  std::cout << "Ligne actuelle (sur le 1er objet) : " << row << std::endl;
 	}
 
@@ -347,8 +366,8 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
   std::cout << "Red proportion of the first obj (220 expected) " << colors[0].get_red() << std::endl;
-  std::cout << "x of the first colored obj (should be 1161) " << coordonate_tab[colors[0]].get_x() << std::endl;
-  std::cout << "y of the first colored obj (should be 205) " << coordonate_tab[colors[0]].get_y() << std::endl;
+  std::cout << "x of the first colored obj (should be 1161) " << (coordonate_tab.find(colors[0])->second).get_x() << std::endl;
+  std::cout << "y of the first colored obj (should be 205) " << (coordonate_tab.find(colors[0])->second).get_y() << std::endl;
 
 
   // à moins que les rgb dans le vector colors soient triés (par valeur du red ?)
@@ -433,8 +452,8 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 	//	std::map<Rgb, std::vector<std::vector<int> > > c_tab;
 
-	int a = coordonate_tab[*current_color].get_x();
-	int b = coordonate_tab[*current_color].get_y();
+	int a = (coordonate_tab.find(*current_color)->second).get_x();
+	int b = (coordonate_tab.find(*current_color)->second).get_y();
 
 
 	/*
