@@ -86,11 +86,13 @@ void print_first_colored_obj(std::vector<Rgb> colors, std::map<Rgb, std::vector<
 {
   int i, j;
 
-  for (i = 0; i < c_tab[colors[0]].size(); ++i)
+  for (i = 0; i < 90; ++i) //(c_tab.find(colors[0])->second).size(); ++i)
   {
-    for (j = 0; j < c_tab[colors[0]][i].size(); ++j)
-      if (c_tab[colors[0]][i][j] == 1)
+    for (j = 0; j < 150; ++j)//(c_tab.find(colors[0])->second)[i].size(); ++j)
+      if ((c_tab.find(colors[0])->second)[j][i] == 1)
 	std::cout << "*";
+      else
+	std::cout << " ";
     std::cout << std::endl;
   }
 
@@ -224,10 +226,10 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	//	int_rgb.insert(std::pair<int, Rgb> (nb_colors, *adding_rgb));
 
 
-	new_tab.resize(80);
+	new_tab.resize(300);
 
 	for (int i = 0; i < new_tab.size(); ++i)
-	  new_tab[i].resize(100);                      // + init to 0 values ?
+	  new_tab[i].resize(150);                      // + init to 0 values ?
 
 
 
@@ -342,12 +344,13 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	}
 
 
+	/*
 	if ((*current_color).get_red() == 220 && (*current_color).get_green() == 220 && (*current_color).get_blue() == 109) // si on est sur le 1er objet recontré
 	{
 	  std::cout << "Colonne actuelle (sur le 1er objet) : " << col << "             current get_x() : " << (coordonate_tab.find(*current_color)->second).get_x() << std::endl;
 	  std::cout << "Ligne actuelle (sur le 1er objet) : " << row << std::endl;
 	}
-
+	*/
 
 	/*
 	if (coordonate_tab[first_item_color].get_x() <= 1160)
@@ -438,7 +441,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
 
-  // now we must put as many 1 as needed in each tab corresponding to right color at the right place
+  // now we must put as many 1 as needed in each tab corresponding to right color at the right place and resize if necessary
   for (def::coord row = geom::min_row(out); row < geom::max_row(out); ++row)
     for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col)
     {
@@ -455,47 +458,34 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	int a = (coordonate_tab.find(*current_color)->second).get_x();
 	int b = (coordonate_tab.find(*current_color)->second).get_y();
 
+	int vector_x_size = (c_tab.find(*current_color)->second).size();
+	int vector_y_size = (c_tab.find(*current_color)->second)[0].size();
 
-	/*
-	std::cout << "x du tab : " << a << std::endl;
-	std::cout << "y du tab : " << b << std::endl;
-	*/
-
-	/*
-	std::cout << "c_tab[*current_color].size() : " << c_tab[*current_color].size() << std::endl;
-	std::cout << "col : " << col << std::endl << "a : " << a << std::endl;
-
-	*/
+	if (col - a >= vector_x_size)
+	  (c_tab.find(*current_color)->second).resize(vector_x_size + col - a + 1);
 
 
+	// $$
 
-	//   std::map<Rgb, std::vector<std::vector<int> > > c_tab;
+	if (row - b >= vector_y_size)
+	{
+	  (c_tab.find(*current_color)->second)[0].resize((c_tab.find(*current_color)->second)[0].size() + row - b + 1); // init auto à 0
 
-
-	if (col - a > (c_tab.find(*current_color)->second).size())
-	  (c_tab.find(*current_color)->second).resize((c_tab.find(*current_color)->second).size() + col - a); // init à 0 ?
-
-
-
-	if (row - b > (c_tab.find(*current_color)->second)[0].size())
-	  for (int i = 0; i < (c_tab.find(*current_color)->second).size(); ++i)
-	    (c_tab.find(*current_color)->second)[i].resize((c_tab.find(*current_color)->second)[i].size() + row - b);
+	  for (int i = 1; i < (c_tab.find(*current_color)->second).size(); ++i)
+	    (c_tab.find(*current_color)->second)[i].resize((c_tab.find(*current_color)->second)[0].size());
+	}
 
 
-	/*
-	std::cout << "Corresponding tab size (x) : " << c_tab[*current_color].size() << std::endl;
-	std::cout << "col - a = " << col - a << std::endl;
+	//	if (*current_color == first_item_color)
+	try
+	{
+	  //(c_tab.find(*current_color)->second)[col - a][row - b] = 1;
+	}
+	catch (...)
+	{
+	  std::cout << "Trying to access a la case ([" << col - a << "][" << row - b << "] du tableau d'une couleur" << std::endl;
 
-	std::cout << "row - b = " << row - b << std::endl;
-	std::cout << "Corresponding tab size (y) : " << c_tab[*current_color][0].size() << std::endl;
-
-	*/
-
-
-
-	// NEED to set each stuff into the object to 1
-
-	//x	(c_tab[*current_color])[col - a][row - b] = 1;
+	}
       }
 
       // FIXME SEGFAULT bizarre
@@ -509,12 +499,10 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   io::ppm::save(out, argv[2]);
 
-  std::cout << "Segfault !" << std::endl;
-
 
   // on peut sauvegarder les couleurs correspondantes aux notes reconnues, comme ça au moment de repasser sur l'output pour coloriser les notes blanc ou en rouge, dès qu'on tombe sur un pixel de couleur connue dans le vecteur de couleurs OK, on le passe en rouge, sinon blanc
 
-  //  print_first_colored_obj(colors, c_tab);
+  print_first_colored_obj(colors, c_tab);
 
 
 
