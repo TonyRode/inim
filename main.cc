@@ -439,7 +439,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
   // now we must put as many 1 as needed in each tab corresponding to right color at the right place and resize if necessary
-  for (def::coord row = geom::min_row(out); row < 470 && row < geom::max_row(out); ++row)
+  for (def::coord row = geom::min_row(out); /*row < 470 &&*/ row < geom::max_row(out); ++row)
     for (def::coord col = geom::min_col(out); col < geom::max_col(out); ++col) // $$$$  BE CAREFUL !! ENLEVER LE row < 470 (c'était pour éviter le segfault)
     {
       // set the current_color to current pixel color
@@ -467,10 +467,10 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	if (row - b >= vector_y_size)
 	{
 	  (c_tab.find(*current_color)->second)[0].resize((c_tab.find(*current_color)->second)[0].size() + row - b + 1); // init auto à 0
-
+	}
 	  for (int i = 1; i < (c_tab.find(*current_color)->second).size(); ++i)
 	    (c_tab.find(*current_color)->second)[i].resize((c_tab.find(*current_color)->second)[0].size());
-	}
+	  //}
 
 
 
