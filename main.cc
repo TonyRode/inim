@@ -589,7 +589,7 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
   /*  for (y = 0; y < obj[0].size(); ++y)
       for (x = 0; x < obj.size(); ++x)*/
   for (x = 0; y < obj.size(); ++x)
-    for (y = 0; y < obj[x].size(); ++y)*/
+    for (y = 0; y < obj[x].size(); ++y)
     {
       // Criteres : une sorte de bouboule
 
@@ -641,10 +641,6 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 	  if (obj[r_x][r_y] != 1)
 	    still_possible1 = false;
 
-
-	if (still_possible1)
-	  return true;
-
       }
 
 
@@ -653,9 +649,9 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 	max_y = y;
 
       // ET un objet en forme de batonnet a peu pres vertical
-      /*      if (still_possible1 && max_y >= 10 * radius)  // entre 10 et 12
+      if (still_possible1 && max_y >= 10 * radius)  // entre 10 et 12
 	return true;
-      */
+
 
       // à améliorer !
       if (still_possible1)
