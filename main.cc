@@ -474,12 +474,14 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
 
 
-
+	/*
 	if (*current_color == bugged_color)
 	  {
 	    std::cout << "Col : " << col << "   Line : " << row << std::endl;
 	    std::cout << "Trying to access a la case ([" << col - a << "][" << row - b << "] du tableau d'une couleur" << std::endl;
 	  }
+	*/
+
 	(c_tab.find(*current_color)->second)[col - a][row - b] = 1;
       }
       // couleur du PIXEL qui segfault : 129, 216, 143 à l'endroit 571, 453
@@ -641,15 +643,17 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 	  if (obj[r_x][r_y] != 1)
 	    still_possible1 = false;
 
-      }
+	if (still_possible1)
+	  still_possible = true;
 
+      }
 
 
       if (obj[x][y] == 1 && y > max_y)
 	max_y = y;
 
       // ET un objet en forme de batonnet a peu pres vertical
-      if (still_possible1 && max_y >= 10 * radius)  // entre 10 et 12
+      if (still_possible && max_y >= 10 * radius)  // entre 10 et 12
 	return true;
 
 
