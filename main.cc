@@ -651,9 +651,9 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 	max_y = y;
 
       // ET un objet en forme de batonnet a peu pres vertical
-      if (still_possible1 && max_y >= 10 * radius)  // entre 10 et 12
+      /*      if (still_possible1 && max_y >= 10 * radius)  // entre 10 et 12
 	return true;
-
+      */
 
       // à améliorer !
       if (still_possible1)
