@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   Rgb first_item_color = *(new Rgb(220, 220, 109));
   // end test part
 
-  unsigned int radius = 5;   // accuracy of the detection, 5px by default for notes
+  unsigned int radius = 4;   // accuracy of the detection, 5px by default for notes
 
 
   // 1 object <-> 1 color (represented by an int)
@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 
   // Détecter les x et y de chaque tab, initialiser les maps
 
-  std::cout << "Nouvelles couleurs détectées (on montre uniquement leur niveau de rouge)" << std::endl;
+  //  std::cout << "Nouvelles couleurs détectées (on montre uniquement leur niveau de rouge)" << std::endl;
 
   int nb_colors = 0; // = nb objects recognized
 
@@ -205,7 +205,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	nb_colors++;
 
 
-	std::cout << (*current_color).get_red() << "; ";
+	//	std::cout << (*current_color).get_red() << "; ";
 
 	Rgb* adding_rgb = new Rgb((*current_color).get_red(), (*current_color).get_green(), (*current_color).get_blue());
 	std::vector<std::vector<int> > new_tab;
@@ -357,10 +357,6 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
   std::cout << "4 (got x now), width of the image : " << geom::max_col(out) << std::endl;
 
 
-  std::cout << "Red proportion of the first obj (220 expected) " << colors[0].get_red() << std::endl;
-  std::cout << "x of the first colored obj (should be 1161) " << (coordonate_tab.find(colors[0])->second).get_x() << std::endl;
-  std::cout << "y of the first colored obj (should be 205) " << (coordonate_tab.find(colors[0])->second).get_y() << std::endl;
-
 
   // à moins que les rgb dans le vector colors soient triés (par valeur du red ?)
 
@@ -492,10 +488,6 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
     }
 
 
-  if (radius == 5)
-    std::cout << "Ouiiiiiiiiiiiiiiiiiiiiiii   radius = 5 !" << std::endl;
-
-
   // $$$
 
   // Call of the function of recognizing objects likely a quarter note, on every tab
@@ -511,7 +503,7 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
       ++nb_color2;
     }
 
-  std::cout << "nb colors2 : " << nb_color2 << std::endl;
+  std::cout << "Number of objects detected as quarter notes : " << nb_color2 << std::endl;
 
 
     // l'ajouter dans colors_of_notes
@@ -590,7 +582,7 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 
   /*  for (y = 0; y < obj[0].size(); ++y)
       for (x = 0; x < obj.size(); ++x)*/
-  for (x = 0; y < obj.size(); ++x)
+  for (x = 0; x < obj.size(); ++x)
     for (y = 0; y < obj[x].size(); ++y)
     {
       // Criteres : une sorte de bouboule
@@ -653,7 +645,7 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 	max_y = y;
 
       // ET un objet en forme de batonnet a peu pres vertical
-      if (still_possible && max_y >= 10 * radius)  // entre 10 et 12
+      if (still_possible && max_y >= 12 * radius)  // entre 10 et 12
 	return true;
 
 

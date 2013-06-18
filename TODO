@@ -7,7 +7,10 @@
 -passer à g++ v4.5
 
 
--S'occuper de la map <int, Rgb> et passer les autres map en <int, truc>
+-S'occuper de la map <int, Rgb> et passer les autres map en <int, truc> --> OK
+
+
+-Print des phases (phase 1 terminée, phase 2 ...)
 
 
 
