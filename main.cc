@@ -468,8 +468,8 @@ int main(int argc, char* argv[]) // works for pbm as input at the moment and ppm
 	{
 	  (c_tab.find(*current_color)->second)[0].resize((c_tab.find(*current_color)->second)[0].size() + row - b + 1); // init auto à 0
 	}
-	  for (int i = 1; i < (c_tab.find(*current_color)->second).size(); ++i)
-	    (c_tab.find(*current_color)->second)[i].resize((c_tab.find(*current_color)->second)[0].size());
+	for (int i = 1; i < (c_tab.find(*current_color)->second).size(); ++i)
+	  (c_tab.find(*current_color)->second)[i].resize((c_tab.find(*current_color)->second)[0].size());
 	  //}
 
 
@@ -576,6 +576,7 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 {
   unsigned int x, y, max_y, r_x, r_y;
   bool still_possible1 = true;
+  bool still_possible = false;
 
   max_y = 0;
   r_x = 0;
@@ -650,9 +651,9 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 	max_y = y;
 
       // ET un objet en forme de batonnet a peu pres vertical
-      /*      if (max_y >= 4 * radius)
-	still_possible = true;
-      */
+      if (still_possible1 && max_y >= 10 * radius)  // entre 10 et 12
+	return true;
+
 
       // à améliorer !
       if (still_possible1)
