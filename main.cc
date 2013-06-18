@@ -586,8 +586,10 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 
   // pour des raisons d'opti, on va check que les pixels à la périphérie du "cercle" plutôt ovale
 
-  for (y = 0; y < obj[0].size(); ++y)
-    for (x = 0; x < obj.size(); ++x)
+  /*  for (y = 0; y < obj[0].size(); ++y)
+      for (x = 0; x < obj.size(); ++x)*/
+  for (x = 0; y < obj.size(); ++x)
+    for (y = 0; y < obj[x].size(); ++y)*/
     {
       // Criteres : une sorte de bouboule
 
