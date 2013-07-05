@@ -7,7 +7,9 @@ To use the project, go to the root folder of it, and simply type "make" (be sure
 It will create a binary file, named "detect".
 
 Then, launch it like this :
-"./detect path_src_img path_dst_img"
+"./detect path_src_img path_dst_img [accuracy]"
+
+accuracy is optionnal, this is an int that you can specify if you know the dimension of the note.
 
 
 And see the result in the destination image.
@@ -19,6 +21,10 @@ Supported image types are :
     PGM
     PNM
     PPM
+BUT, you must use pbm format for the source image (the command "convert" is very useful under linux).
+
+
+
 
 
 

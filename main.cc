@@ -568,13 +568,18 @@ bool is_black(Rgb px)
 
 bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radius)
 {
-  unsigned int x, y, max_y, r_x, r_y;
+  unsigned int x, y, max_x, rmax_x, max_y, r_x, r_y, rr_x, rr_y;
   bool still_possible1 = true;
   bool still_possible = false;
 
+
+  max_x = 0;
+  rmax_x = 0; // width of the object
   max_y = 0;
   r_x = 0;
   r_y = 0;
+  rr_x = 0;
+  rr_y = 0;
 
 
 
@@ -582,6 +587,14 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 
   /*  for (y = 0; y < obj[0].size(); ++y)
       for (x = 0; x < obj.size(); ++x)*/
+
+  for (x = 0; x < obj.size(); ++x)
+    for (y = 0; y < obj[x].size(); ++y)
+      if (obj[x][y] == 1 && y > max_y)
+	max_y = y;
+
+
+
   for (x = 0; x < obj.size(); ++x)
     for (y = 0; y < obj[x].size(); ++y)
     {
@@ -590,7 +603,8 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 
       // on vérifie qu'on est dans le cadre
       if (x > radius && (x + radius) < obj.size()
-	  && y > radius && y + radius < obj[0].size())
+	  && y > radius && y + radius < obj[0].size()
+	  && ((y >= radius && y <= 4 * radius) || (y >= max_y - 4 * radius)))
       {
 	// begins with top, 1ere moitié droite, sens inverse trigo
 	for (r_x = x, r_y = y - radius; r_x <= x + radius / 2; ++r_x)
@@ -635,19 +649,70 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 	  if (obj[r_x][r_y] != 1)
 	    still_possible1 = false;
 
+
+	// ça y est on a une sorte de bouboule à un endroit
 	if (still_possible1)
+	{
 	  still_possible = true;
+
+
+	  // test d'amelioration
+	  rr_x = x - radius;
+	  rr_y = y + radius;
+
+	  while (rr_x > 0 && obj[rr_x][rr_y] == 1)
+	    rr_x--;
+
+	  rr_x++;
+
+	  if (y >= max_y - 4 * radius)
+	    while (rr_y > y - 4 * radius)
+	    {
+	      while (rr_x < obj.size() && obj[rr_x][rr_y] == 1)
+	      {
+		rr_x++;
+		rmax_x++;
+	      }
+	      rr_y--;
+	    }
+	  else if (y >= radius && y <= 4 * radius)
+	    while (rr_y > 0 && obj[rr_x][rr_y] == 1)
+	    {
+	      while (rr_x < obj.size() && obj[rr_x][rr_y] == 1)
+	      {
+		rr_x++;
+		rmax_x++;
+	      }
+	      rr_y--;
+	    }
+
+
+	  if (max_x < rmax_x)
+	    max_x = rmax_x;
+	}
 
       }
 
 
-      if (obj[x][y] == 1 && y > max_y)
-	max_y = y;
+
+      // now we got our max x !
+
+
+      // need to compare with la largeur au milieu de l'objet
+
 
       // ET un objet en forme de batonnet a peu pres vertical
       if (still_possible && max_y >= 12 * radius)  // entre 10 et 12
-	return true;
+      {
+	for (rr_y = max_y / 2, rr_x = 0; rr_x < obj.size() && obj[rr_x][rr_y] == 0; ++rr_x) {}
 
+        int res = 0;
+
+	for (; rr_x < obj.size() && obj[rr_x][rr_y] == 1; ++rr_x, ++res) {}
+
+	if (3 * res <= max_x)// || rmax_x == 0) // changed max_x to rmax_x // le rmax_x == 0 à enlever en théorie
+	  return true;
+      }
 
       // à améliorer !
       if (still_possible1)
@@ -658,6 +723,7 @@ bool is_like_quarter_note(std::vector<std::vector<int> > obj, unsigned int radiu
 
 
       still_possible1 = true;
+      rmax_x = 0;
 
     }
 
